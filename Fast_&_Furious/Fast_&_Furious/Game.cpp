@@ -1,27 +1,25 @@
 #include "Game.h"
+#include "Circulo.h"
 
-Game::Game() : ventana(sf::VideoMode(800, 600), "Fast_&_Furious"), miCirculo(50.0f, 300.0f) {
+Game::Game() : window(sf::VideoMode(800, 600), "Fast & Furious"),
+myCircle(1.0f, 500.0f) {
+	// Configuración inicial de la ventana y el objeto
 }
 
 void Game::Go() {
-	miCirculo.setVelocidadFinal(500.0f); // Setear la velocidad final
-
-	while (ventana.isOpen()) {
-		sf::Event evento;
-		while (ventana.pollEvent(evento)) {
-			if (evento.type == sf::Event::Closed) {
-				ventana.close();
-			}
+	while (window.isOpen()) {
+		sf::Event event;
+		while (window.pollEvent(event)) {
+			if (event.type == sf::Event::Closed)
+				window.close();
 		}
 
-		float deltaTiempo = reloj.restart().asSeconds();
+		float deltaTime = 1.0f / 60.0f;
+		myCircle.update(deltaTime);
 
-		ventana.clear();
+		window.clear();
+		myCircle.draw(window);
 
-		// Actualizar y dibujar el círculo
-		miCirculo.actualizar(deltaTiempo);
-		miCirculo.dibujar(ventana);
-
-		ventana.display();
+		window.display();
 	}
 }
