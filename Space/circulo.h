@@ -3,15 +3,15 @@
 
 class Circulo {
 public:
-    Circulo(float velocidadInicial, float velocidadFinal);
-
-    void actualizar(float deltaTiempo);
-    void dibujar(sf::RenderWindow& ventana);
-    void setVelocidadFinal(float nuevaVelocidadFinal);
+    Circulo(float initialX, float initialY, float initialVelocity, float initialAcceleration, float initialRadius);
+    void update();
+    void draw(sf::RenderWindow& window);
+    void setAcceleration(float newAcceleration);
 
 private:
-    sf::CircleShape circulo;
-    float velocidad;
-    float velocidadInicial;
-    float velocidadFinal;
+    float x;
+    float y;
+    float velocity;
+    float acceleration;
+    float radius;
 };

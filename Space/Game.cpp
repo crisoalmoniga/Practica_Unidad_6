@@ -1,27 +1,44 @@
 #include "Game.h"
 
-Game::Game() : ventana(sf::VideoMode(800, 600), "Fast_&_Furious"), miCirculo(50.0f, 300.0f) {
-}
+Game::Game() : window(sf::VideoMode(1024, 768), "Space"),
+mruvCircle(400.0f, 300.0f, 0.0f, 0.0f, 20.0f) {}
 
 void Game::Go() {
-	miCirculo.setVelocidadFinal(500.0f); // Setear la velocidad final
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
 
-	while (ventana.isOpen()) {
-		sf::Event evento;
-		while (ventana.pollEvent(evento)) {
-			if (evento.type == sf::Event::Closed) {
-				ventana.close();
-			}
-		}
+            // Detectar teclas presionadas
+            if (event.type == sf::Event::KeyPressed) {
+                if (event.key.code == sf::Keyboard::Left) {
+                    mruvCircle.setAcceleration(-0.0001f);  // Aceleración hacia la izquierda
+                }
+                else if (event.key.code == sf::Keyboard::Right) {
+                    mruvCircle.setAcceleration(0.0001f);  // Aceleración hacia la derecha
+                }
+            }
 
-		float deltaTiempo = reloj.restart().asSeconds();
+            // Detectar teclas liberadas
+            if (event.type == sf::Event::KeyReleased) {
+                if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::Right) {
+                    mruvCircle.setAcceleration(0.0f);  // Detener la aceleración cuando se suelta la tecla
+                }
+            }
+        }
 
-		ventana.clear();
+        // Actualizar la velocidad y posición del círculo
+        mruvCircle.update();
 
-		// Actualizar y dibujar el círculo
-		miCirculo.actualizar(deltaTiempo);
-		miCirculo.dibujar(ventana);
+        // Limpiar la ventana
+        window.clear();
 
-		ventana.display();
-	}
+        // Dibujar el círculo en la nueva posición
+        mruvCircle.draw(window);
+
+        // Actualizar la ventana
+        window.display();
+    }
 }

@@ -1,6 +1,6 @@
 #pragma once
 #include <SFML/Graphics.hpp>
-#include "circulo.h"
+#include "Circulo.h"
 
 class Game {
 public:
@@ -8,7 +8,6 @@ public:
     void Go();
 
 private:
-    sf::RenderWindow ventana;
-    Circulo miCirculo;
-    sf::Clock reloj;
+    sf::RenderWindow window;
+    Circulo mruvCircle;
 };
