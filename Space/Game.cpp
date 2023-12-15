@@ -1,7 +1,7 @@
 #include "Game.h"
 
 Game::Game() : window(sf::VideoMode(1024, 768), "Space"),
-mruvCircle(400.0f, 300.0f, 0.0f, 0.0f, 20.0f) {}
+Circle(400.0f, 300.0f, 0.0f, 0.0f, 20.0f) {}
 
 void Game::Go() {
     while (window.isOpen()) {
@@ -14,29 +14,29 @@ void Game::Go() {
             // Detectar teclas presionadas
             if (event.type == sf::Event::KeyPressed) {
                 if (event.key.code == sf::Keyboard::Left) {
-                    mruvCircle.setAcceleration(-0.0001f);  // Aceleración hacia la izquierda
+                    Circle.setAcceleration(-0.0001f);  // Aceleración hacia la izquierda
                 }
                 else if (event.key.code == sf::Keyboard::Right) {
-                    mruvCircle.setAcceleration(0.0001f);  // Aceleración hacia la derecha
+                    Circle.setAcceleration(0.0001f);  // Aceleración hacia la derecha
                 }
             }
 
             // Detectar teclas liberadas
             if (event.type == sf::Event::KeyReleased) {
                 if (event.key.code == sf::Keyboard::Left || event.key.code == sf::Keyboard::Right) {
-                    mruvCircle.setAcceleration(0.0f);  // Detener la aceleración cuando se suelta la tecla
+                    Circle.setAcceleration(0.0f);  // Detener la aceleración cuando se suelta la tecla
                 }
             }
         }
 
         // Actualizar la velocidad y posición del círculo
-        mruvCircle.update();
+        Circle.update();
 
         // Limpiar la ventana
         window.clear();
 
         // Dibujar el círculo en la nueva posición
-        mruvCircle.draw(window);
+        Circle.draw(window);
 
         // Actualizar la ventana
         window.display();

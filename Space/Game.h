@@ -9,5 +9,5 @@ public:
 
 private:
     sf::RenderWindow window;
-    Circulo mruvCircle;
+    Circulo Circle;
 };
