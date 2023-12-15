@@ -7,7 +7,7 @@ public:
 
 	// Variables de puntos, vidas y enemigos muertos
 	int puntos = 0;
-	int vidas = 9;
+	int vidas = 19;
 	int enemigosMuertos = 0;
 
 	// Posiciones iniciales de enemigos e inocentes
@@ -28,11 +28,11 @@ public:
 
 	bool juegoIniciado = false;
 	
-	// Constructor y destructor de la clase
+	// Constructor y destructor
 	Game();
 	~Game();
 
-	// Método principal para ejecutar el juego
+	// Ejecutar el juego
 	void Go();
 
 private:

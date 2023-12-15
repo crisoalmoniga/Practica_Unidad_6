@@ -14,139 +14,141 @@ Game::~Game() {
 }
 
 void Game::Go() {
+    Pantalla pantalla;
 
-	Pantalla pantalla;
+    // Creacion de ventana principal del juego
+    sf::RenderWindow window(sf::VideoMode(1024, 768), "La mano en la lata");
 
-	// Creacion de ventana principal del juego
-	sf::RenderWindow window(sf::VideoMode(1024, 768), "La mano en la lata");
+    sf::Font Fuente;
+    Fuente.loadFromFile("EncodeSans-VariableFont_wdth,wght.ttf");
 
-	sf::Font Fuente;
+    // Carga de texturas
+    if (!enemigoTexture.loadFromFile("enemigo.png") || !inocenteTexture.loadFromFile("inocente.png") || !miraTexture.loadFromFile("mira.png")) {
+        std::cout << "Falta textura"; // Salir si hay un error al cargar alguna textura
+    }
 
-	Fuente.loadFromFile("EncodeSans-VariableFont_wdth,wght.ttf");
+    Mira mira(miraTexture);
 
-	//Carga de texturas
-	if (!enemigoTexture.loadFromFile("enemigo.png") || !inocenteTexture.loadFromFile("inocente.png") || !miraTexture.loadFromFile("mira.png")){
-		std::cout << "Falta textura"; // Salir si hay un error al cargar alguna textura
-	}
+    // Tiempo de spawneo de los sprites - Setear a gusto
+    sf::Clock tiempoEnPantalla;
+    float tiempoLimite = 2.5f;
 
-	sf::Sprite sprite;
-	sprite.setScale(1.2f, 1.2f);
+    srand(static_cast<unsigned int>(time(0)));
 
-	Mira mira(miraTexture);
+    EnemigoInocente enemigo(enemigoTexture, inocenteTexture, posiciones);
 
-	//Tiempo de spawneo de los sprites - Setear a gusto
-	sf::Clock tiempoEnPantalla;
-	float tiempoLimite = 2.5f;
+    bool juegoTerminado = false;
+    sf::Clock tiempoPantallaFinal;
 
-	srand(static_cast<unsigned int>(time(0)));
+    // Bucle principal del juego
+    while (window.isOpen()) {
+        sf::Event event;
+        while (window.pollEvent(event)) {
+            // Eventos de la ventana principal
+            if (event.type == sf::Event::Closed) {
+                window.close();
+            }
+            else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
+                // Click izquierdo del mouse
+                sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+                sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
+                if (event.type == sf::Event::MouseButtonPressed) {
+                    juegoIniciado = true;
+                }
 
+                // Verifica si el click es en un enemigo o inocente
+                if (enemigo.getSprite().getGlobalBounds().contains(worldPosition)) {
+                    if (enemigo.getSprite().getTexture() == &enemigoTexture) {
+                        puntos += 10;
+                        enemigosMuertos++;
+                        enemigo.cambiarPosicionYTexturaAleatoria();
+                        tiempoEnPantalla.restart();
+                    }
+                    else if (enemigo.getSprite().getTexture() == &inocenteTexture) {
+                        vidas--;
+                        enemigo.cambiarPosicionYTexturaAleatoria();
+                        tiempoEnPantalla.restart();
+                    }
+                }
+            }
+        }
 
-	EnemigoInocente enemigo(enemigoTexture, inocenteTexture, posiciones);
+        // Posición de la mira según la posición del mouse
+        sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
+        mira.setPosition(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
 
-	bool juegoTerminado = false;
-	sf::Clock tiempoPantallaFinal;
+        // Tiempo de exposición del enemigo en pantalla
+        if (tiempoEnPantalla.getElapsedTime().asSeconds() > tiempoLimite) {
+            if (enemigo.getSprite().getTexture() == &enemigoTexture) {
+                vidas--;
+            }
 
-	// Bucle principal del juego
-	while (window.isOpen()) {
-		sf::Event event;
-		while (window.pollEvent(event)) {
-			// Eventos de la ventana principal
-			if (event.type == sf::Event::Closed) {
-				window.close();
-			}
-			else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left) {
-				// Click izquierdo del mouse
-				sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-				sf::Vector2f worldPosition = window.mapPixelToCoords(mousePosition);
-				if (event.type == sf::Event::MouseButtonPressed) {
-					juegoIniciado = true;
-				}
+            enemigo.cambiarPosicionYTexturaAleatoria();
+            tiempoEnPantalla.restart();
+        }
 
-				// Verifica si el click es en un enemigo o inocente
-				if (enemigo.getSprite().getGlobalBounds().contains(worldPosition)) {
-					if (enemigo.getSprite().getTexture() == &enemigoTexture) {
-						puntos += 10;
-						enemigosMuertos++;
-						enemigo.cambiarPosicionYTexturaAleatoria();
-						tiempoEnPantalla.restart();
-					}
-					else if (enemigo.getSprite().getTexture() == &inocenteTexture) {
-						vidas--;
-						enemigo.cambiarPosicionYTexturaAleatoria();
-						tiempoEnPantalla.restart();
-					}
-				}
-			}
-		}
+        // Logica MRUV para mover hacia abajo
+        if (juegoIniciado) {
+            float deltaTime = tiempoEnPantalla.getElapsedTime().asSeconds();
+            enemigo.Update(deltaTime);
+        }
 
-		// Posición de la mira según la posición del mouse
-		sf::Vector2i mousePosition = sf::Mouse::getPosition(window);
-		mira.setPosition(static_cast<float>(mousePosition.x), static_cast<float>(mousePosition.y));
+        // Objetos de texto para mostrar en ventana
+        sf::Text textoVidas("Vidas: " + std::to_string(vidas), Fuente, 30);
+        textoVidas.setPosition(40, 710);
 
-		// Tiempo de exposición del enemigo en pantalla
-		if (tiempoEnPantalla.getElapsedTime().asSeconds() > tiempoLimite) {
-			if (enemigo.getSprite().getTexture() == &enemigoTexture) {
-				vidas--;
-			}
+        sf::Text textoEnemigosMuertos("Corruptos muertos: " + std::to_string(enemigosMuertos), Fuente, 30);
+        textoEnemigosMuertos.setPosition(730, 710);
 
-			enemigo.cambiarPosicionYTexturaAleatoria();
-			tiempoEnPantalla.restart();
-		}
+        sf::Text textoPuntaje("Puntaje: " + std::to_string(puntos), Fuente, 30);
+        textoPuntaje.setPosition(460, 710);
 
-		// Objetos de texto para mostrar en ventana
-		sf::Text textoVidas("Vidas: " + std::to_string(vidas), Fuente, 30);
-		textoVidas.setPosition(40, 710);
+        window.clear();
 
-		sf::Text textoEnemigosMuertos("Corruptos muertos: " + std::to_string(enemigosMuertos), Fuente, 30);
-		textoEnemigosMuertos.setPosition(730, 710);
+        // Dibuja el fondo primero
+        window.draw(pantalla.spriteFondo);
 
-		sf::Text textoPuntaje("Puntaje: " + std::to_string(puntos), Fuente, 30);
-		textoPuntaje.setPosition(460, 710);
+        if (juegoIniciado == false) {
+            window.draw(pantalla.spriteInicio);
+        }
 
-		window.clear();
-		if (juegoIniciado == false)
-		{
-			window.draw(pantalla.spriteInicio);
-		}
+        if (juegoIniciado) {
+            window.draw(enemigo.getSprite());
+            mira.draw(window);
 
-		if (juegoIniciado) {
-			window.draw(enemigo.getSprite());
-			window.draw(pantalla.spriteFondo);
-			mira.draw(window);
+            window.draw(textoPuntaje);
+            window.draw(textoVidas);
+            window.draw(textoEnemigosMuertos);
 
-			window.draw(textoPuntaje);
-			window.draw(textoVidas);
-			window.draw(textoEnemigosMuertos);
+            // Muestra pantalla de ganaste o perdiste
+            if (enemigosMuertos >= 10) {
+                window.draw(pantalla.spriteGanaste);
+            }
+            else if (vidas <= 0) {
+                window.draw(pantalla.spritePerdiste);
+            }
+        }
 
-			// Muestra pantalla de ganaste o perdiste
-			if (enemigosMuertos >= 10) {
-				window.draw(pantalla.spriteGanaste);
-			}
-			else if (vidas <= 0) {
-				window.draw(pantalla.spritePerdiste);
-			}
-		}
+        window.display();
 
-		window.display();
+        // Verificacion de condiciones de fin del juego y mostrar pantalla final
+        if (vidas <= 0 || enemigosMuertos >= 10) {
+            if (!juegoTerminado) {
+                tiempoPantallaFinal.restart();
+                juegoTerminado = true;
+            }
 
-		// Verificacion de condiciones de fin del juego y mostrar pantalla final
-		if (vidas <= 0 || enemigosMuertos >= 10) {
-			if (!juegoTerminado) {
-				tiempoPantallaFinal.restart();
-				juegoTerminado = true;
-			}
+            if (enemigosMuertos >= 10) {
+                window.draw(pantalla.spriteGanaste);
+            }
+            else if (vidas <= 0) {
+                window.draw(pantalla.spritePerdiste);
+            }
 
-			if (enemigosMuertos >= 10) {
-				window.draw(pantalla.spriteGanaste);
-			}
-			else if (vidas <= 0) {
-				window.draw(pantalla.spritePerdiste);
-			}
-
-			// Cierra final la ventana después de 10 segundos en la pantalla final
-			if (tiempoPantallaFinal.getElapsedTime().asSeconds() > 10.0f) {
-				window.close();
-			}
-		}
-	}
+            // Cierra final la ventana después de 10 segundos en la pantalla final
+            if (tiempoPantallaFinal.getElapsedTime().asSeconds() > 10.0f) {
+                window.close();
+            }
+        }
+    }
 }

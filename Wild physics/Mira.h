@@ -17,5 +17,5 @@ public:
     void draw(sf::RenderWindow& window);
 
 private:
-    sf::Sprite sprite;  // Objeto sprite para representar la mira en el juego
+    sf::Sprite sprite;  // Representa la mira en el juego
 };
